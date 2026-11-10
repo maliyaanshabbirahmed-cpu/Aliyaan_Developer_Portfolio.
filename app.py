@@ -1,194 +1,614 @@
+
 import streamlit as st
 from pathlib import Path
+import base64
+import html
+
+# ============================================================
+# PAGE CONFIGURATION
+# ============================================================
 
 st.set_page_config(
-    page_title="Muhammad Aliyaan | Developer Portfolio",
-    page_icon="⚡",
+    page_title="Aliyaan | Developer Portfolio",
+    page_icon="💻",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="collapsed"
 )
 
-ROOT = Path(__file__).parent
-PROFILE_IMAGE = ROOT / "assets" / "profile_photo.jpg"
+BASE_DIR = Path(__file__).parent
+ASSETS_DIR = BASE_DIR / "assets"
+PROJECT_IMAGES = ASSETS_DIR / "projects"
+
+# ============================================================
+# PERSONAL INFORMATION
+# Edit these values whenever needed.
+# ============================================================
+
+NAME = "M. Aliyaan Shabbir Ahmed"
+ROLE = "Python Developer | AI & Machine Learning Enthusiast"
+
+INTRO = """
+I am a developer interested in Python programming, artificial
+intelligence, machine learning, and building practical software
+applications. I enjoy learning new technologies and turning
+ideas into working projects.
+"""
+
+EMAIL = ""  # Add your real email address here.
+
+GITHUB = "https://github.com/maliyaanshabbirahmed-cpu"
+
+# ============================================================
+# IMAGE FUNCTIONS
+# ============================================================
+
+def get_image_base64(image_path):
+    path = Path(image_path)
+
+    if not path.exists():
+        return None
+
+    try:
+        return base64.b64encode(path.read_bytes()).decode("utf-8")
+    except Exception:
+        return None
+
+
+def display_profile_image():
+    image_path = BASE_DIR / "profile_photo.jpg"
+    encoded = get_image_base64(image_path)
+
+    if encoded:
+        st.markdown(
+            f"""
+            <div class="profile-image-container">
+                <img src="data:image/jpeg;base64,{encoded}"
+                     class="profile-image">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.warning(
+            "Profile image not found. Add profile_photo.jpg "
+            "to the root directory of your repository."
+        )
+
+
+# ============================================================
+# CUSTOM CSS
+# ============================================================
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-:root { --gold:#d9b66f; --muted:#a6a6b2; --panel:#151720; }
-html, body, [class*="css"] { font-family:'DM Sans',sans-serif; }
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+    --gold: #D6AE55;
+    --gold-light: #F3D58B;
+    --background: #080808;
+    --card: #121212;
+    --text: #F5F5F5;
+    --muted: #A0A0A0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 .stApp {
-  background:
-    radial-gradient(circle at 82% 5%, rgba(201,160,83,.13), transparent 28%),
-    radial-gradient(circle at 8% 35%, rgba(61,79,125,.12), transparent 30%),
-    #090a0f;
-  color:#f5f5f7;
+    background: var(--background);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
 }
-.block-container { max-width:1180px; padding-top:2rem; padding-bottom:4rem; }
-h1,h2,h3 { font-family:'Space Grotesk',sans-serif !important; }
-a { color:var(--gold) !important; }
+
+header[data-testid="stHeader"] {
+    background: transparent;
+}
+
+footer {
+    visibility: hidden;
+}
+
+.block-container {
+    max-width: 1200px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+h1, h2, h3 {
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+.gold {
+    color: var(--gold);
+}
+
 .hero {
-  background:linear-gradient(135deg,rgba(28,30,40,.98),rgba(15,16,22,.96));
-  border:1px solid rgba(217,182,111,.28); border-radius:26px;
-  padding:34px; box-shadow:0 18px 60px rgba(0,0,0,.25);
+    padding: 65px 15px 45px;
+    text-align: center;
 }
-.eyebrow { color:var(--gold); letter-spacing:.18em; text-transform:uppercase; font-size:.76rem; font-weight:700; }
-.hero-title { font-family:'Space Grotesk',sans-serif; font-size:clamp(2.1rem,5vw,4rem); line-height:1.05; font-weight:700; margin:.45rem 0; }
-.hero-sub { color:#d7d7df; font-size:1.1rem; line-height:1.65; max-width:720px; }
-.pill {
- display:inline-block; border:1px solid rgba(217,182,111,.3); background:rgba(217,182,111,.08);
- color:#ead5a7; border-radius:999px; padding:6px 11px; margin:4px 5px 4px 0; font-size:.82rem;
+
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(38px, 6vw, 68px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 10px;
+    color: white;
 }
-.section-kicker { color:var(--gold); font-size:.76rem; letter-spacing:.16em; font-weight:700; text-transform:uppercase; }
-.project {
- background:linear-gradient(145deg,#181a24,#11131a); border:1px solid #2a2d39;
- border-radius:18px; padding:22px; min-height:270px; height:100%;
+
+.hero-role {
+    color: var(--gold);
+    font-size: 20px;
+    font-weight: 600;
 }
-.project h3 { margin:.4rem 0 .65rem 0; font-size:1.25rem; }
-.project p { color:#c1c2cb; line-height:1.6; font-size:.94rem; }
-.project-meta { color:#9fa1ad; font-size:.8rem; margin-top:14px; }
-.project-link {
- display:inline-block; margin-top:14px; padding:9px 14px; border-radius:10px;
- background:rgba(217,182,111,.12); border:1px solid rgba(217,182,111,.35);
- text-decoration:none !important; font-weight:600;
+
+.hero-description {
+    max-width: 720px;
+    margin: 20px auto;
+    color: #B7B7B7;
+    font-size: 16px;
+    line-height: 1.9;
 }
+
+.profile-image-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.profile-image {
+    width: 205px;
+    height: 205px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--gold);
+    padding: 5px;
+    background: #121212;
+    box-shadow: 0 0 35px rgba(214,174,85,0.20);
+}
+
+.section-title {
+    font-size: 34px;
+    font-weight: 800;
+    margin-top: 65px;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.section-subtitle {
+    color: #999;
+    margin-bottom: 28px;
+    font-size: 15px;
+}
+
+.gold-line {
+    width: 65px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 5px;
+    margin: 12px 0 25px;
+}
+
+.project-card {
+    background: linear-gradient(145deg, #171717, #0E0E0E);
+    border: 1px solid #292929;
+    border-radius: 15px;
+    padding: 20px;
+    min-height: 230px;
+    margin-bottom: 20px;
+    transition: 0.3s ease;
+}
+
+.project-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-5px);
+}
+
+.project-card h3 {
+    color: var(--gold-light);
+    font-size: 21px;
+    margin-bottom: 12px;
+}
+
+.project-card p {
+    color: #B5B5B5;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
 .skill-card {
- background:#141620; border:1px solid #282b36; border-radius:15px;
- padding:17px; margin-bottom:10px; min-height:140px;
+    background: #141414;
+    border: 1px solid #292929;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    text-align: center;
+    color: #E8E8E8;
+    font-weight: 600;
+    transition: 0.2s;
 }
-.skill-card h4 { color:#f1d69e; margin:0 0 10px 0; font-family:'Space Grotesk',sans-serif; }
-.small-muted { color:#a6a8b3; font-size:.88rem; line-height:1.6; }
-.footer { border-top:1px solid #292b35; padding-top:22px; color:#999ba6; text-align:center; }
-div[data-testid="stImage"] img { border-radius:20px; }
-.stButton button { border-radius:10px; }
+
+.skill-card:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.info-card {
+    background: #141414;
+    border: 1px solid #292929;
+    padding: 22px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+}
+
+.info-card h3 {
+    color: var(--gold);
+}
+
+.tag {
+    display: inline-block;
+    color: var(--gold-light);
+    background: #282216;
+    border: 1px solid #544324;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    margin: 4px 3px;
+}
+
+.footer {
+    border-top: 1px solid #292929;
+    text-align: center;
+    padding: 30px 10px;
+    margin-top: 65px;
+    color: #888;
+    font-size: 13px;
+}
+
+div.stButton > button {
+    background: var(--gold);
+    color: #080808;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    padding: 10px 22px;
+}
+
+div.stButton > button:hover {
+    background: var(--gold-light);
+    color: black;
+    border: none;
+}
+
+a {
+    color: var(--gold-light) !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# Header navigation
-nav1, nav2 = st.columns([3, 2])
+
+# ============================================================
+# NAVIGATION
+# ============================================================
+
+nav1, nav2, nav3, nav4, nav5 = st.columns(5)
+
 with nav1:
-    st.markdown("**MA.** <span style='color:#d9b66f'>PORTFOLIO</span>", unsafe_allow_html=True)
+    st.markdown("[Home](#home)")
+
 with nav2:
-    st.markdown("<div style='text-align:right;color:#a6a6b2;font-size:.88rem'>ABOUT &nbsp; · &nbsp; PROJECTS &nbsp; · &nbsp; SKILLS &nbsp; · &nbsp; EDUCATION</div>", unsafe_allow_html=True)
+    st.markdown("[About](#about-me)")
 
-st.write("")
-with st.container():
-    st.markdown('<div class="hero">', unsafe_allow_html=True)
-    left, right = st.columns([1, 2.5], vertical_alignment="center")
-    with left:
-        if PROFILE_IMAGE.exists():
-            st.image(str(PROFILE_IMAGE), use_container_width=True)
-    with right:
-        st.markdown('<div class="eyebrow">Aspiring AI & Software Developer</div>', unsafe_allow_html=True)
-        st.markdown('<div class="hero-title">Muhammad Aliyaan<br>Shabbir Ahmed</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="hero-sub">A student developer exploring Python, Data Science, Machine Learning, Computer Vision and Generative AI. I enjoy learning by building practical applications and turning ideas into working software.</div>',
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            '<span class="pill">Python</span><span class="pill">Data Science</span>'
-            '<span class="pill">Machine Learning</span><span class="pill">Generative AI</span>'
-            '<span class="pill">Streamlit</span>',
-            unsafe_allow_html=True
-        )
-        st.caption("Grade 9 student · Agentic AI & Data Science learner at Saylani Mass IT Training (SMIT)")
-    st.markdown('</div>', unsafe_allow_html=True)
+with nav3:
+    st.markdown("[Skills](#technical-skills)")
 
-st.write("")
-st.markdown('<div class="section-kicker">01 / About</div>', unsafe_allow_html=True)
-st.header("Curious by nature. Building through code.")
-st.markdown("""
-I am a Grade 9 student currently studying **Agentic AI and Data Science at Saylani Mass IT Training (SMIT)**.
-I am a fast learner who enjoys understanding how technology works, experimenting with new tools and developing
-applications. My current learning spans Python programming, data analysis, machine learning, deep learning,
-computer vision and Generative AI.
+with nav4:
+    st.markdown("[Projects](#my-projects)")
 
-My long-term ambition is to contribute to meaningful technology and, one day, work with an innovative
-organization such as **Microsoft or OpenAI**. I see that ambition as a direction to work toward through
-consistent learning, strong fundamentals and real project experience.
-""")
+with nav5:
+    st.markdown("[Contact](#contact-me)")
 
-st.write("")
-st.markdown('<div class="section-kicker">02 / Selected work</div>', unsafe_allow_html=True)
-st.header("Projects")
-st.markdown('<p class="small-muted">A selection of applications I have built and deployed. Open each project to explore it.</p>', unsafe_allow_html=True)
+
+# ============================================================
+# HERO SECTION
+# ============================================================
+
+st.markdown('<div id="home"></div>', unsafe_allow_html=True)
+
+st.markdown('<div class="hero">', unsafe_allow_html=True)
+
+display_profile_image()
+
+st.markdown(
+    f'<div class="hero-title">{html.escape(NAME)}</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    f'<div class="hero-role">{html.escape(ROLE)}</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    f'<div class="hero-description">{html.escape(INTRO.strip())}</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ============================================================
+# ABOUT SECTION
+# ============================================================
+
+st.markdown('<div id="about-me"></div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="section-title">About <span class="gold">Me</span></div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="gold-line"></div>', unsafe_allow_html=True)
+
+about1, about2 = st.columns([1.5, 1])
+
+with about1:
+    st.markdown("""
+    I am a technology enthusiast focused on software development
+    and artificial intelligence.
+
+    My interests include:
+
+    - Python application development
+    - Machine Learning and Deep Learning
+    - Computer Vision and YOLO
+    - AI-powered applications
+    - Natural Language Processing
+    - Building interactive web applications
+
+    My objective is to continuously improve my programming
+    abilities and develop useful real-world applications.
+    """)
+
+with about2:
+    st.markdown("""
+    <div class="info-card">
+        <h3>Developer Profile</h3>
+        <p><b>Primary Language:</b> Python</p>
+        <p><b>Framework:</b> Streamlit</p>
+        <p><b>Interests:</b> AI / ML</p>
+        <p><b>Focus:</b> Application Development</p>
+        <p><b>Location:</b> Karachi, Pakistan</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================
+# SKILLS SECTION
+# ============================================================
+
+st.markdown('<div id="technical-skills"></div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="section-title">Technical <span class="gold">Skills</span></div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="gold-line"></div>', unsafe_allow_html=True)
+
+skills = {
+    "Programming": [
+        "Python",
+        "SQL",
+        "JavaScript"
+    ],
+    "AI & Machine Learning": [
+        "Machine Learning",
+        "Deep Learning",
+        "YOLO",
+        "Computer Vision",
+        "RAG",
+        "LangChain"
+    ],
+    "Development Tools": [
+        "Streamlit",
+        "Git",
+        "GitHub",
+        "VS Code",
+        "Google Colab"
+    ]
+}
+
+for category, skill_list in skills.items():
+
+    st.subheader(category)
+
+    columns = st.columns(4)
+
+    for index, skill in enumerate(skill_list):
+        with columns[index % 4]:
+            st.markdown(
+                f'<div class="skill-card">{html.escape(skill)}</div>',
+                unsafe_allow_html=True
+            )
+
+
+# ============================================================
+# PROJECTS SECTION
+# ============================================================
+
+st.markdown('<div id="my-projects"></div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="section-title">My <span class="gold">Projects</span></div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="gold-line"></div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="section-subtitle">Selected software and AI projects.</div>',
+    unsafe_allow_html=True
+)
 
 projects = [
     {
-        "number":"PROJECT 01",
-        "name":"LinguaFlow — Voice & Text Translator",
-        "description":"A translation application focused on helping users convert language content. The project has been developed around speech recognition and translation workflows. Supported languages and current voice features should be confirmed against the live app.",
-        "stack":"Python · Streamlit · Speech / Translation APIs",
-        "url":"https://transalatorapppy-fejjzljvfuhtmsbkge9ftx.streamlit.app/",
-        "status":"Deployed app",
+        "name": "LinguaFlow",
+        "description": "A voice and text translation application designed to support multilingual communication.",
+        "tech": ["Python", "Streamlit", "Speech Recognition", "Translation"],
+        "image": "linguaflow.png",
+        "icon": "🌍",
+        "url": ""
     },
     {
-        "number":"PROJECT 02",
-        "name":"ImageData Extractor — Image to CSV",
-        "description":"An image-data extraction application designed to read text, numbers and other visible information from uploaded images, then organize extracted content for CSV-style data output. Review the live app for the exact recognition and export options.",
-        "stack":"Python · Streamlit · OCR / Image Processing",
-        "url":"https://imagedataextractor-lappjdyaltzgrndw8cu5cvb.streamlit.app/",
-        "status":"Deployed app",
+        "name": "ImageData Extractor",
+        "description": "An image-to-data application focused on extracting text and numerical information from images and converting it into structured CSV data.",
+        "tech": ["Python", "OCR", "Computer Vision", "CSV"],
+        "image": "image_extractor.png",
+        "icon": "📄",
+        "url": ""
     },
     {
-        "number":"PROJECT 03",
-        "name":"Khurram Tuition AI — Learning Assistant",
-        "description":"An AI-focused tuition and learning project. The precise features and intended student workflow have not yet been provided, so this portfolio keeps the description general rather than claiming unverified capabilities.",
-        "stack":"Python · Streamlit · AI (confirm exact stack)",
-        "url":"https://khurramtuitionaibyaliyaan-g5nnntims5x7yp4elbndhr.streamlit.app/",
-        "status":"Link supplied from app name",
-    },
+        "name": "Khurram Tuition AI",
+        "description": "An educational AI application concept focused on providing learning assistance.",
+        "tech": ["Python", "AI", "Streamlit"],
+        "image": "khurram_tuition.png",
+        "icon": "🎓",
+        "url": ""
+    }
 ]
 
-cols = st.columns(3, gap="medium")
-for col, p in zip(cols, projects):
-    with col:
-        st.markdown(f"""
-        <div class="project">
-          <div class="section-kicker">{p['number']}</div>
-          <h3>{p['name']}</h3>
-          <p>{p['description']}</p>
-          <div class="project-meta"><b>Technology:</b> {p['stack']}<br><b>Status:</b> {p['status']}</div>
-          <a class="project-link" href="{p['url']}" target="_blank" rel="noopener noreferrer">Open application ↗</a>
-        </div>
-        """, unsafe_allow_html=True)
+project_columns = st.columns(2)
 
-st.write("")
-st.markdown('<div class="section-kicker">03 / Technical toolkit</div>', unsafe_allow_html=True)
-st.header("Skills & learning")
-st.markdown('<p class="small-muted">Topics studied through coursework and practice. This section describes learning exposure, not a claim of expert-level proficiency in every tool.</p>', unsafe_allow_html=True)
+for index, project in enumerate(projects):
 
-skill_groups = [
-    ("Python Programming", "Python fundamentals, variables and data types, conditionals, loops, functions, modules, data structures, OOP, file handling, exception handling, libraries and packages."),
-    ("Data Science & Analytics", "NumPy, Pandas, data cleaning, preprocessing, data analysis, exploratory data analysis (EDA), statistics, probability, Matplotlib, Seaborn and data visualization."),
-    ("Machine Learning", "Supervised and unsupervised learning, Linear Regression, Logistic Regression, Decision Trees, Random Forest, Support Vector Machines (SVM), model training, testing and evaluation."),
-    ("Deep Learning & Computer Vision", "Artificial Neural Networks (ANN), Convolutional Neural Networks (CNN), TensorFlow, Keras, YOLO object detection, image classification and image preprocessing."),
-    ("Generative AI", "Large Language Models (LLMs), Generative AI, OpenAI and Gemini APIs, prompt engineering, LangChain and Agentic AI workflows."),
-    ("App Development & Deployment", "Streamlit, frontend/backend concepts, Git and GitHub, virtual environments, pip, requirements.txt, Streamlit Cloud deployment and Python application development."),
+    with project_columns[index % 2]:
+
+        st.markdown('<div class="project-card">', unsafe_allow_html=True)
+
+        image_path = PROJECT_IMAGES / project["image"]
+
+        if image_path.exists():
+            st.image(str(image_path), use_container_width=True)
+        else:
+            st.markdown(
+                f'<div style="font-size:55px;text-align:center;padding:20px;">'
+                f'{project["icon"]}</div>',
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            f'<h3>{html.escape(project["name"])}</h3>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            f'<p>{html.escape(project["description"])}</p>',
+            unsafe_allow_html=True
+        )
+
+        tags = "".join(
+            f'<span class="tag">{html.escape(tag)}</span>'
+            for tag in project["tech"]
+        )
+
+        st.markdown(tags, unsafe_allow_html=True)
+
+        if project["url"]:
+            st.link_button("View Project", project["url"])
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ============================================================
+# ADDITIONAL PROJECT IMAGE GALLERY
+# ============================================================
+
+st.markdown(
+    '<div class="section-title">Project <span class="gold">Gallery</span></div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="gold-line"></div>', unsafe_allow_html=True)
+
+gallery_images = [
+    PROJECT_IMAGES / "linguaflow.png",
+    PROJECT_IMAGES / "image_extractor.png",
+    PROJECT_IMAGES / "khurram_tuition.png"
 ]
-skill_cols = st.columns(2, gap="medium")
-for i, (title, desc) in enumerate(skill_groups):
-    with skill_cols[i % 2]:
-        st.markdown(f'<div class="skill-card"><h4>{title}</h4><div class="small-muted">{desc}</div></div>', unsafe_allow_html=True)
 
-st.write("")
-st.markdown('<div class="section-kicker">04 / Education</div>', unsafe_allow_html=True)
-st.header("Education & ongoing learning")
-e1, e2 = st.columns(2)
-with e1:
-    st.markdown("**School Education**")
-    st.markdown("Grade 9 student")
-with e2:
-    st.markdown("**Saylani Mass IT Training (SMIT)**")
-    st.markdown("Agentic AI and Data Science courses")
+existing_gallery = [p for p in gallery_images if p.exists()]
 
-st.write("")
-st.markdown('<div class="section-kicker">05 / Direction</div>', unsafe_allow_html=True)
-st.header("Building toward the future")
+if existing_gallery:
+
+    gallery_columns = st.columns(3)
+
+    for index, image_path in enumerate(existing_gallery):
+        with gallery_columns[index % 3]:
+            st.image(
+                str(image_path),
+                caption=image_path.stem.replace("_", " ").title(),
+                use_container_width=True
+            )
+else:
+    st.info(
+        "Add your project screenshots to assets/projects "
+        "to display them in this gallery."
+    )
+
+
+# ============================================================
+# CONTACT SECTION
+# ============================================================
+
+st.markdown('<div id="contact-me"></div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="section-title">Contact <span class="gold">Me</span></div>',
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="gold-line"></div>', unsafe_allow_html=True)
+
 st.markdown("""
-I want to keep strengthening my programming foundations, build useful AI-powered applications and gain
-experience solving real problems. My long-term goal is to become a skilled software and AI professional
-and work toward opportunities at companies such as Microsoft or OpenAI.
+Interested in discussing a project, technology, or collaboration?
+You can reach me through the contact details below.
 """)
 
-st.markdown("")
-st.markdown('<div class="footer">© 2026 Muhammad Aliyaan Shabbir Ahmed · Built with Python & Streamlit</div>', unsafe_allow_html=True)
+contact1, contact2 = st.columns(2)
+
+with contact1:
+
+    if EMAIL.strip():
+        st.markdown(f"**Email:** {EMAIL}")
+        st.link_button(
+            "Send Me an Email",
+            f"mailto:{EMAIL}"
+        )
+    else:
+        st.info("Add your email address in the EMAIL variable.")
+
+with contact2:
+
+    st.markdown("**GitHub:** Developer repository")
+
+    st.link_button(
+        "View My GitHub Repositories",
+        GITHUB
+    )
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.markdown("""
+<div class="footer">
+    <p>Designed and developed by M. Aliyaan Shabbir Ahmed</p>
+    <p>Python • Artificial Intelligence • Software Development</p>
+    <p>© 2026 All Rights Reserved.</p>
+</div>
+""", unsafe_allow_html=True)
